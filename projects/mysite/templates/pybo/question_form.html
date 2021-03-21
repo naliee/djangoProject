@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+<!-- HTML입력창 직접 작성 -->
+{% block content %}
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+    <form method="post" class="post-form my-3">
+        {% csrf_token %}
+         <!-- 오류표시 Start -->
+         {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+            {% for field in form %}
+                {% if field.errors %}
+                <strong>{{ field.label }}</strong>
+                {{ field.errors }}
+                {% endif %}
+            {% endfor %}
+         </div>
+         {% endif %}
+        <!-- 오류표시 End -->
+     <div class="form-group">
+         <label for="subject">제목</label>
+         <input type="text" class="form-control" name="subject" id="subject"
+                value="{{ form.subject.value|default_if_none:'' }}">
+                <!-- form.subject.value에 값이 없을 경우 'None'이라는 문자열이 표시되므로 이를 공백으로 표시하기 위해 default_if_none:'' -->
+     </div>
+
+     <div class="form-group">
+         <label for="content">내용</label>
+         <textarea class="form-control" name="content"
+                   id="content" rows="10">{{ form.content.value|default_if_none:'' }}</textarea>
+     </div>
+
+     <button type="submit" class="btn btn-primary">저장하기</button>
+    </form>
+</div>
+{% endblock %}
+
+
+<!--    form.as_p를 사용하여 자동으로 입력창 만들 경우
+block content %}
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2">질문등록</h5>
+    <form method="post" class="post-form my-3">
+        {% csrf_token %}
+        {{ form.as_p }} 
+        form: question_create함수에서 전달한 QuestionForm객체
+        form.as_p: 모델 폼과 연결된 입력 항목 subject, content에 값을 입력할 수 있는 HTML코드를 자동으로 만들어 준다
+        <button type="submit" class="btn btn-primary">저장하기</button>
+    </form>
+</div>
+endblock %} 
+-->
