@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container my-3">
+    <table class="table">
+        <thead>
+        <tr class="thead-dark">
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성일시</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if post_list %} 
+        <!-- post_list에 내용이 있을 경우 -->
+        {% for post in post_list %}
+        <!-- post_list의 요소 question으로 정의하고 for문 -->
+        <tr>
+            <td><!-- forloop.counter: for문 도는 숫자 카운트 - 일련번호 부여 -->
+                {{ forloop.counter }}
+            </td>
+            <td>        <!-- url 별칭 사용 -->
+                <a href="{% url 'nboard:detail' post.id %}">{{ post.subject }}</a>
+            </td>
+            <td>{{ post.create_date }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td>질문이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+
+    <a href="{% url 'nboard:post_create' %}" class="btn btn-primary">질문 등록하기</a>
+
+</div>
+
+{% endblock %}

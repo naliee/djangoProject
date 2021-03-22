@@ -1,0 +1,33 @@
+{% load static %} <!--static파일 적용을 위해 작성-->
+<!doctype html>
+<html lang="ko">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}">
+    <!-- pybo CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    <title>Hello, nboard!</title>
+</head>
+
+<body>
+    <!-- 네비게이션바 -->
+    {% include 'navbar.html' %}
+    <!-- 템플릿의 특정 영역을 중복, 반복해서 사용할 경우 유용 - 따로 관리하는 게 유지보수에 유리 -->
+
+<!-- 기본 템플릿 안에 삽입될 내용 Start -->
+{% block content %}
+<!-- 이후 base.html템플릿을 상속한 파일에서 구현해야 하는 영역 -->
+{% endblock %}
+<!-- 기본 템플릿 안에 삽입될 내용 End -->
+
+<!-- 네비게이션 바에서 햄버거 메뉴 사용 -->
+<!-- jQuery JS -->
+<script src="{% static 'jquery-3.6.0.min.js' %}"></script>
+<!-- Bootstrap JS -->
+<script src="{% static 'bootstrap.min.js' %}"></script>
+
+</body>
+</html>

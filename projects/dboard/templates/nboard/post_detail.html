@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container my-3">
+
+    <h2 class="border-bottom py-2">{{ post.subject }}</h2>
+
+    <!-- 각 질문, 답변은 하나의 뭉치로 card 컴포넌트 사용 -->
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;">{{ post.content }}</div>
+            <div class="d-flex justify-content-end">
+                <div class="badge badge-light p-2">
+                    {{ post.create_date }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- post.comment_set.all(): 해당 post에 연결된 모든 comment 정보 -->
+    <h5 class="border-bottom my-3 py-2">{{post.comment_set.count}}개의 답변이 있습니다.</h5>
+    
+    {% for comment in post.comment_set.all %}
+    <div class="card my-3"> <!-- class=my-3: 상하 마진값 3 -->
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;">{{ comment.content }}</div>
+            <div class="d-flex justify-content-end"> <!-- justify-content-end: 컴포넌트 오른쪽 정렬 -->
+                <div class="badge badge-light p-2">
+                    {{ comment.create_date }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+    <form action="{% url 'nboard:comment_create' post.id %}" method="post" class="my-3">
+        {% csrf_token %} <!-- 보안: form태그 바로 밑에 항상 입력/ form 엘리먼트를 통해 전송된 데이터가 실제 웹 브라우저에서 작성된 데이터인지 판단 -->
+        
+        {% if form.errors %} <!--오류 표시 영역 추가-->
+        <div class="alert alert-danger" role="alert">
+        {% for field in form %}
+            {% if field.errors %}
+            <strong>{{ field.label }}</strong>
+            {{ field.errors }}
+            {% endif %}
+        {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <textarea name="content" id="content" class="form-control" rows="10"></textarea>
+        </div>
+        <input type="submit" value="답변등록" class="btn btn-primary">
+    </form>
+
+</div>
+
+{% endblock %}
