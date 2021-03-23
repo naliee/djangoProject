@@ -17,6 +17,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+        # ForeignKey: 1:N 관계일 때 사용(하나의 Post에 여러 개의 Comment 연결 가능)
     content = models.TextField()
     create_date = models.DateTimeField()
 

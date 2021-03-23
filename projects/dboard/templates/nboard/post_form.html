@@ -5,7 +5,9 @@
     <h5 class="my-3 border-bottom pb-2">게시글 등록</h5>
     <form method="POST" class="post-form my-3">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.as_p }} 
+        <!-- form의 as_p옵션: 각 태그를 p로 감싼다 - 각 태그가 한 줄씩 표시 -->
+        <!-- as_table 등 옵션 있음 -->
         <button type="submit" class="btn btn-primary">저장하기</button>
     </form>
 </div>

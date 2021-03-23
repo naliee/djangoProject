@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.core.paginator import Paginator
 
 from .models import Post
 from django.utils import timezone
@@ -10,7 +11,13 @@ from .forms import PostForm, CommentForm
 def index(request):
     """게시글 목록 출력(작성일시 역순)"""
     post_list = Post.objects.order_by('-create_date')   # 기호 -가 붙어 역순
-    context = {'post_list':post_list}
+
+    # 페이징 처리
+    page = request.GET.get('page', '1') # get방식 요청에서 page=? 형식일 때 (값이 주어지지 않을 경우 기본값 1로 설정)
+    paginator = Paginator(post_list, 10) # post_list객체를 Paginator로 변환, 페이지당 10개씩 보여주기
+    page_obj = paginator.get_page(page)
+
+    context = {'post_list':page_obj}
     return render(request, 'nboard/post_list.html', context)
 
 
@@ -26,6 +33,7 @@ def comment_create(request, post_id):
     post = get_object_or_404(Post, pk=post_id) # 파라미터로 들어온 pk로 post데이터 가져와 저장
 
     if request.method == "POST":
+            # POST로 받은 request값을 CommentForm으로 변환
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
@@ -35,6 +43,7 @@ def comment_create(request, post_id):
             return redirect('nboard:detail', post_id=post_id)
     else:
         form = CommentForm()
+
     context = {'post':post, 'form':form}
     ''' form을 사용하지 않을 경우 저장법
     post.comment_set.create(content=request.POST.get('content'), create_date=timezone.now())

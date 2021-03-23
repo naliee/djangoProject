@@ -21,4 +21,5 @@ from nboard import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('nboard/', include('nboard.urls')),
+    path('common/', include('common.urls')),
 ]
