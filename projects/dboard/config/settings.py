@@ -105,9 +105,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
@@ -123,3 +123,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# 로그인 성공 시 리다이렉트할 페이지 지정(디폴트는 /accounts/profile/)
+LOGIN_REDIRECT_URL = '/'
+# 로그아웃 성공 시 리다이렉트할 위치
+LOGOUT_REDIRECT_URL = '/'

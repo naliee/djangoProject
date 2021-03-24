@@ -12,12 +12,11 @@
     </div>
     {% endif %}
 
-    <h2 class="border-bottom py-2">{{ post.subject }}</h2>
+    <h2 class="border-bottom py-2 text-center">사용자 정보</h2>
 
-    <!-- 각 질문, 답변은 하나의 뭉치로 card 컴포넌트 사용 -->
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;">{{ post.content }}</div>
+            <div class="card-text" style="white-space: pre-line;">{{post.author.username}}</div>
             <div class="d-flex justify-content-end">
                 {% if post.modify_date %}
                 <div class="badge badge-light p-2 text-left mx-3">
@@ -94,18 +93,4 @@
 
 </div>
 
-{% endblock %}
-
-{% block script %}
-<script type='text/javascript'>
-    // $(document).ready(function() -> 화면이 로드 된 다음 자동으로 호출
-    $(document).ready(function(){
-        $(".delete").on('click', function() {
-            if(confirm("정말로 삭제하시겠습니까?")) {
-                // 정말로 삭제하겠습니까? 묻는 창이 뜨고, 확인 버튼 클릭 시 $(".delete")의 data-uri값으로 URL 호출
-                location.href = $(this).data('uri');
-            }
-        });
-    });
-    </script>
 {% endblock %}

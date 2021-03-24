@@ -1,7 +1,8 @@
 from django import forms
 from nboard.models import Post, Comment
 
-# ModelForm: 모델과 연결한 폼 - 이 객체를 저장하면 연결된 모델의 데이터를 저장 가능
+# ModelForm: 모델과 연결한 폼 - 이 객체를 저장하면 '연결된 모델의 데이터를 저장' 가능
+
 class PostForm(forms.ModelForm):
     # 메타 클래스(모델, 필드 포함) 반드시 가져야 함
     class Meta:

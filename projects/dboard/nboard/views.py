@@ -2,7 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 
-from .models import Post
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages # 오류를 임의로 발생시킬 때 사용(넌필드-입력값과 관계없이 발생한- 오류)
+
+from .models import Post, Comment
 from django.utils import timezone
 
 from .forms import PostForm, CommentForm
@@ -25,9 +28,14 @@ def detail(request, post_id):
     """게시글 내용 출력"""
     post = get_object_or_404(Post, pk=post_id)
     context = {'post':post}
-    return render(request, 'nboard/post_detail.html', context)
+    #'nboard/post_detail.html'
+    return render(request, 'common/user_detail.html', context)
 
 
+# 로그아웃 상태일 시 request.user에는 AnonymousUser객체가 들어있어 로그아웃 상태로 해당 함수 실행 시 오류 발생
+# 로그인이 필요한 로직의 경우 @login_required 어노테이션 적용 (login_url=: 로그아웃상태로 해당 함수 실행 시 이동할 URL)
+# 이 방식으로 common:login으로 이동 후, 로그인 성공 시 next파라미터에 있는 URL페이지로 이동(login.html에 next파라미터 추가해줌)
+@login_required(login_url='common:login')
 def comment_create(request, post_id):
     """게시글 댓글 등록"""
     post = get_object_or_404(Post, pk=post_id) # 파라미터로 들어온 pk로 post데이터 가져와 저장
@@ -37,6 +45,7 @@ def comment_create(request, post_id):
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
+            comment.author = request.user
             comment.create_date = timezone.now()
             comment.post = post
             comment.save()
@@ -45,16 +54,11 @@ def comment_create(request, post_id):
         form = CommentForm()
 
     context = {'post':post, 'form':form}
-    ''' form을 사용하지 않을 경우 저장법
-    post.comment_set.create(content=request.POST.get('content'), create_date=timezone.now())
-    # Post모델을 통해 Comment모델 데이터를 생성하기 위해 post(post_id로 불러온 Post모델 객체).comment_set.create
-    # Comment모델로 저장: comment = Comment(post=post, content=request.POST.get('content'), create_date.../ comment.save())
-    return redirect('nboard:detail', post_id=post_id) # 게시글 상세 페이지로 재이동
-          # redirect(): 함수에 전달된 값을 참고하여 페이지 이동: redirect(이동할 페이지 별칭, 해당 URL에 전달해야 할 값)
-    '''
+
     return render(request, 'nboard/post_detail.html', context)
 
 
+@login_required(login_url='common:login')
 def post_create(request):
     """게시글 등록"""
     if request.method == 'POST':    # 내용 입력 후 등록 클릭할 경우 POST - request의 POST요청으로 들어온 폼을 저장
@@ -62,6 +66,7 @@ def post_create(request):
 
         if form.is_valid(): # form이 유효한지 검사
             post = form.save(commit=False) # create_date는 아직 저장되지 않았으므로 임시저장
+            post.author = request.user
             post.create_date = timezone.now()
             post.save()
             return redirect('nboard:index')
@@ -70,3 +75,70 @@ def post_create(request):
         form = PostForm()
     context = {'form':form}
     return render(request, 'nboard/post_form.html', context)
+
+
+@login_required(login_url='common:login')
+def post_modify(request, post_id):
+    """nboard 게시글 수정"""
+    post = get_object_or_404(Post, pk=post_id)
+    # 유저가 게시글 작성자가 아닐 시 수정 불가 
+    if request.user != post.author:
+        messages.error(request, '수정 권한이 없습니다')
+        return redirect('nboard:detail', post_id=post_id)
+
+    if request.method == "POST":
+        form = PostForm(request.POST, instance=post) # 질문 수정 화면에 기존 데이터가 반영되도록 instance 매개변수에 저장
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.modify_date = timezone.now()
+            post.save()
+            return redirect('nboard:detail', post_id=post_id)
+    else:   # 수정하기 누르면 GET 호출, 질문 수정(form)화면 표시
+        form = PostForm(instance=post)
+    context = {'form':form}
+    return render(request, 'nboard/post_form.html', context)
+
+
+@login_required(login_url='common:login')
+def post_delete(request, post_id):
+    """nboard 게시글 삭제"""
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user != post.author:
+        messages.error(request, "삭제 권한이 없습니다")
+        return redirect('nboard:detail', post_id=post_id)
+    post.delete()
+    return redirect('nboard:index')
+
+
+@login_required(login_url='common:login')
+def comment_modify(request, comment_id):
+    """comment 수정"""
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user != comment.author:
+        messages.error(request, '수정 권한이 없습니다')
+        return redirect('nboard:detail', post_id=comment.post.id)
+    
+    if request.method == "POST":
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.modify_date = timezone.now()
+            comment.save()
+            return redirect('nboard:detail', post_id=comment.post.id)
+    else:
+        form = CommentForm(instance=comment)
+    context = {'comment':comment, 'form':form}
+    return render(request, 'nboard/comment_form.html', context)
+    
+
+@login_required(login_url='common:login')
+def comment_delete(request, comment_id):
+    """comment 삭제"""
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user != comment.author:
+        messages.error(request, '삭제 권한이 없습니다')
+    else:
+        comment.delete()
+    return redirect('nboard:detail', post_id=comment.post.id)
