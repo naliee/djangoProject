@@ -5,11 +5,17 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}">
     <!-- pybo CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
     <title>Hello, nboard!</title>
+
+    <link rel="stylesheet" href="{% static 'summernote-lite.css' %}">
+
+    {% block header %}
+    {% endblock %}
 </head>
 
 <body>
@@ -28,6 +34,9 @@
 <script src="{% static 'jquery-3.6.0.min.js' %}"></script>
 <!-- Bootstrap JS -->
 <script src="{% static 'bootstrap.min.js' %}"></script>
+
+<script src="{% static 'summernote-lite.js' %}"></script>
+<script src="{% static 'summernote-ko-KR.js' %}"></script>
 
 {% block script %}
 <!-- 이 html을 상속받는 템플릿이 이 블록을 구현하여 제이쿼리 사용한 코드 사용 가능 -->

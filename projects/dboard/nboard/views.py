@@ -29,7 +29,7 @@ def detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     context = {'post':post}
     #'nboard/post_detail.html'
-    return render(request, 'common/user_detail.html', context)
+    return render(request, 'nboard/post_detail.html', context)
 
 
 # 로그아웃 상태일 시 request.user에는 AnonymousUser객체가 들어있어 로그아웃 상태로 해당 함수 실행 시 오류 발생

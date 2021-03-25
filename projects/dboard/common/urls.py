@@ -11,4 +11,5 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
                     # auth_views의 LogoutView를 사용하는 것인데, as_view()를 써 줘야 html로 보여줌
     path('signup/', views.signup, name='signup'),
+    path('detail/', views.detail, name='detail'),
 ]

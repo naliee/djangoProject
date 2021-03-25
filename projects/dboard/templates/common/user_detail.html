@@ -16,80 +16,27 @@
 
     <div class="card my-3">
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;">{{post.author.username}}</div>
+            <div class="card-text" style="white-space: pre-line;"><strong>회원명</strong> : &nbsp;<kbd>{{user.username}}</kbd></div>
             <div class="d-flex justify-content-end">
-                {% if post.modify_date %}
-                <div class="badge badge-light p-2 text-left mx-3">
-                    <div class="mb-2">수정 시간</div>    
-                    <div>{{ post.modify_date }}</div>
+                <div class="my-3">
+                    <a href="#" class="btn btn-sm btn-outline-secondary">수정</a>
                 </div>
-                {% endif %}
-
-                <div class="badge badge-light p-2 text-left">
-                    <!-- post.author하면 author(모델)객체가 들어있는 것이므로 author.username해야 'username정보'  -->
-                    <div class="mb-2">{{ post.author.username }}</div>    
-                    <div>{{ post.create_date }}</div>
-                </div>
-            </div>
-            {% if request.user == post.author %}
-            <div class="my-3">
-                <a href="{% url 'nboard:post_modify' post.id %}" class="btn btn-sm btn-outline-secondary">수정</a>
-                <a href="#" class="delete btn btn-sm btn-outline-secondary" data-uri="{% url 'nboard:post_delete' post.id %}">삭제</a>
-                <!-- 삭제 전 알림창 표시를 위해 href가 아닌 jQuery처리 -->
-            </div>
-            {% endif %}
+            </div>            
         </div>
     </div>
-    <!-- post.comment_set.all(): 해당 post에 연결된 모든 comment 정보 -->
-    <h5 class="border-bottom my-3 py-2">{{post.comment_set.count}}개의 답변이 있습니다.</h5>
-    
-    {% for comment in post.comment_set.all %}
-    <div class="card my-3"> <!-- class=my-3: 상하 마진값 3 -->
+
+    <div class="card my-3">
         <div class="card-body">
-            <div class="card-text" style="white-space: pre-line;">{{ comment.content }}</div>
-            <div class="d-flex justify-content-end"> <!-- justify-content-end: 컴포넌트 오른쪽 정렬 -->
-                {% if comment.modify_date %}
-                <div class="badge badge-light p-2 text-left mx-3">
-                    <div class="mb-2">수정 시간</div>    
-                    <div>{{ comment.modify_date }}</div>
+            <div class="card-text" style="white-space: pre-line;"><strong>회원 이메일</strong> : &nbsp;<kbd>{{user.email}}</kbd></div>
+            <div class="d-flex justify-content-end">
+                <div class="my-3">
+                    <a href="#" class="btn btn-sm btn-outline-secondary">수정</a>
                 </div>
-                {% endif %}
-
-                <div class="badge badge-light p-2 text-left">
-                    <div class="mb-2">{{ comment.author.username }}</div>
-                    <div>{{ comment.create_date }}</div>
-                </div>
-            </div>
-            {% if request.user == comment.author %}
-            <div class="my-3">
-                <a href="{% url 'nboard:comment_modify' comment.id %}" class="btn btn-sm btn-outline-secondary">수정</a>
-                <a href="#" class="delete btn btn-sm btn-outline-secondary" data-uri="{% url 'nboard:comment_delete' comment.id %}">삭제</a>
-            </div>
-            {% endif %}
+            </div>            
         </div>
     </div>
-    {% endfor %}
-
-    <form action="{% url 'nboard:comment_create' post.id %}" method="post" class="my-3">
-        {% csrf_token %} <!-- 보안: form태그 바로 밑에 항상 입력/ form 엘리먼트를 통해 전송된 데이터가 실제 웹 브라우저에서 작성된 데이터인지 판단 -->
-        
-        {% if form.errors %} <!--코멘트창에 표시되도록 오류 표시 영역 추가-->
-        <div class="alert alert-danger" role="alert">
-        {% for field in form %}
-            {% if field.errors %}
-            <strong>{{ field.label }}</strong>
-            {{ field.errors }}
-            {% endif %}
-        {% endfor %}
-        </div>
-        {% endif %}
-        
-        <div class="form-group">
-            <!-- 로그인 상태가 아닌 경우 disabled -->
-            <textarea {% if not user.is_authenticated %}disabled{% endif %} name="content" id="content" class="form-control" rows="10"></textarea>
-        </div>
-        <input type="submit" value="답변등록" class="btn btn-primary">
-    </form>
+    
+    
 
 </div>
 
