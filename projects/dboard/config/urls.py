@@ -22,6 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('nboard/', include('nboard.urls')),
     path('common/', include('common.urls')),
-    path('', views.index, name='index'), # '' = '/'
+    path('', views.PostListView.as_view(), name='index'), # '' = '/'
     path('summernote/', include('django_summernote.urls')),
 ]

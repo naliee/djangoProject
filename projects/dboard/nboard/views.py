@@ -10,18 +10,20 @@ from django.utils import timezone
 
 from .forms import PostForm, CommentForm
 
+from django.views import generic
+
 # Create your views here.
-def index(request):
-    """게시글 목록 출력(작성일시 역순)"""
-    post_list = Post.objects.order_by('-create_date')   # 기호 -가 붙어 역순
+class PostListView(generic.ListView):
+    model = Post
+    context_object_name = 'post_list'       #DEFAULT : <model_name>_list
+    template_name = 'nboard/post_list.html' #DEFAULT : <app_label>/<model_name>_list.html
+    paginate_by = 10
 
-    # 페이징 처리
-    page = request.GET.get('page', '1') # get방식 요청에서 page=? 형식일 때 (값이 주어지지 않을 경우 기본값 1로 설정)
-    paginator = Paginator(post_list, 10) # post_list객체를 Paginator로 변환, 페이지당 10개씩 보여주기
-    page_obj = paginator.get_page(page)
+    def get_queryset(self):
+        post_list = Post.objects.order_by('-create_date')
+        return post_list
 
-    context = {'post_list':page_obj}
-    return render(request, 'nboard/post_list.html', context)
+
 
 
 def detail(request, post_id):
