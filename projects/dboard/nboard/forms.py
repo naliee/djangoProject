@@ -1,6 +1,8 @@
 from django import forms
 from nboard.models import Post, Comment
 
+from django_summernote.widgets import SummernoteWidget
+
 # ModelForm: 모델과 연결한 폼 - 이 객체를 저장하면 '연결된 모델의 데이터를 저장' 가능
 
 class PostForm(forms.ModelForm):
@@ -12,6 +14,7 @@ class PostForm(forms.ModelForm):
         # 폼에 부트스트랩 적용
         widgets = {
             'subject': forms.TextInput(attrs={'class':'form-control'}),
+            #'content': SummernoteWidget(),
             'content': forms.Textarea(attrs={'class':'form-control', 'rows':10}),
         }
 

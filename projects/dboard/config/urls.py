@@ -23,4 +23,5 @@ urlpatterns = [
     path('nboard/', include('nboard.urls')),
     path('common/', include('common.urls')),
     path('', views.index, name='index'), # '' = '/'
+    path('summernote/', include('django_summernote.urls')),
 ]

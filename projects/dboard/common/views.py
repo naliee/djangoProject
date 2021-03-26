@@ -15,7 +15,7 @@ def signup(request):
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
-            login(request, user)    # 회원가입 끝난 후 자동 로그인
+            login(request, user)    
             return redirect('index')
     else:
         form = UserForm()
