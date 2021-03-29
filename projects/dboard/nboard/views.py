@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, resolve_url
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 
@@ -19,19 +19,18 @@ class PostListView(generic.ListView):
     template_name = 'nboard/post_list.html' #DEFAULT : <app_label>/<model_name>_list.html
     paginate_by = 10
 
+    # ListView의 get_queryset을 오버라이딩 한 것. 이 함수는 자동실행(?)
+    # queryset = Post.object...로 쓸 수도 있으나, 이 방법으로 쓰면 처음 실행시만 쿼리를 불러와 수정 후 프로세스를 재실행시켜줘야 반영됨
     def get_queryset(self):
         post_list = Post.objects.order_by('-create_date')
         return post_list
 
 
-
-
-def detail(request, post_id):
-    """게시글 내용 출력"""
-    post = get_object_or_404(Post, pk=post_id)
-    context = {'post':post}
-    #'nboard/post_detail.html'
-    return render(request, 'nboard/post_detail.html', context)
+class DetailView(generic.DetailView):
+    model = Post
+    pk_url_kwarg = 'post_id'
+    context_object_name = 'post'
+    template_name = 'nboard/post_detail.html'
 
 
 # 로그아웃 상태일 시 request.user에는 AnonymousUser객체가 들어있어 로그아웃 상태로 해당 함수 실행 시 오류 발생
@@ -51,7 +50,9 @@ def comment_create(request, post_id):
             comment.create_date = timezone.now()
             comment.post = post
             comment.save()
-            return redirect('nboard:detail', post_id=post_id)
+            return redirect('{}#comment_{}'.format(resolve_url('nboard:detail', post_id=post_id), comment.id))
+                                                #resolve_url: 실체 호출되는 url을 문자열로 반환하는 장고 함수
+                        # 즉 url(post_id=post_id)#comment_[comment.id]로 redirect됨
     else:
         form = CommentForm()
 
@@ -119,7 +120,7 @@ def comment_modify(request, comment_id):
     comment = get_object_or_404(Comment, pk=comment_id)
     if request.user != comment.author:
         messages.error(request, '수정 권한이 없습니다')
-        return redirect('nboard:detail', post_id=comment.post.id)
+        return redirect('{}#comment_{}'.format(resolve_url('nboard:detail', post_id=comment.post.id), comment.id))
     
     if request.method == "POST":
         form = CommentForm(request.POST, instance=comment)
@@ -128,7 +129,7 @@ def comment_modify(request, comment_id):
             comment.author = request.user
             comment.modify_date = timezone.now()
             comment.save()
-            return redirect('nboard:detail', post_id=comment.post.id)
+            return redirect('{}#comment_{}'.format(resolve_url('nboard:detail', post_id=comment.post.id), comment.id))
     else:
         form = CommentForm(instance=comment)
     context = {'comment':comment, 'form':form}
@@ -143,4 +144,25 @@ def comment_delete(request, comment_id):
         messages.error(request, '삭제 권한이 없습니다')
     else:
         comment.delete()
+    return redirect('nboard:detail', post_id=comment.post.id)
+
+
+def vote_post(request, post_id):
+    """게시글 추천 등록"""
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user == post.author:
+        messages.error(request, '본인이 작성한 글은 추천할 수 없습니다')
+    else:
+        # add함수로 데이터 추가  **ManyToManyField는 중복을 허락하지 않으므로 같은 사람이 여러 번 추천해도 수가 증가하지 않음
+        post.voter.add(request.user)
+    return redirect('nboard:detail', post_id=post.id)
+
+
+def vote_comment(request, comment_id):
+    """댓글 추천 등록"""
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user == comment.author:
+        messages.error(request, '본인이 작성한 글은 추천할 수 없습니다')
+    else:
+        comment.voter.add(request.user)
     return redirect('nboard:detail', post_id=comment.post.id)

@@ -7,6 +7,7 @@
         <thead>
         <tr class="text-center  thead-dark">
             <th>번호</th>
+            <th>추천</th>
             <th style="width: 50%">제목</th>
             <th>글쓴이</th>
             <th>작성일시</th>
@@ -20,6 +21,11 @@
         <tr>
             <td><!-- forloop.counter: for문 도는 숫자 카운트 - 일련번호 부여 -->
                 {{ forloop.counter }}
+            </td>
+            <td>
+                {% if post.voter.all.count > 0 %}
+                <span class="badge badge-warning px-2 py-1">{{ post.voter.all.count }}</span>
+                {% endif %}
             </td>
             <td class="text-left">        <!-- url 별칭 사용 -->
                 <a href="{% url 'nboard:detail' post.id %}">{{ post.subject }}</a>

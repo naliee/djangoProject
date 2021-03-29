@@ -27,3 +27,11 @@ def index(request):
 # <!-- 게시글 번호(총 게시글에서의 순서)가 출력되도록 전체 게시물 개수 - 시작 인덱스 - 현재 인덱스 + 1 -->
 #                 {{ post_list.paginator.count|sub:post_list.start_index|sub:forloop.counter0|add:1 }}
 #                 <!-- forloop.counter0: 0부터 시작하는 루프 내의 현재 인덱스(끝에 0없으면 1부터 시작) -->
+
+
+def detail(request, post_id):
+    """게시글 내용 출력"""
+    post = get_object_or_404(Post, pk=post_id)
+    context = {'post':post}
+    #'nboard/post_detail.html'
+    return render(request, 'nboard/post_detail.html', context)
