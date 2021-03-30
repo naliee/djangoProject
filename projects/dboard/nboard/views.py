@@ -11,13 +11,14 @@ from django.utils import timezone
 from .forms import PostForm, CommentForm
 
 from django.views import generic
+from hitcount.views import HitCountDetailView
 
 # Create your views here.
 class PostListView(generic.ListView):
-    model = Post
-    context_object_name = 'post_list'       #DEFAULT : <model_name>_list
-    template_name = 'nboard/post_list.html' #DEFAULT : <app_label>/<model_name>_list.html
     paginate_by = 10
+    model = Post
+    #context_object_name = 'post_list'       DEFAULT : <model_name>_list
+    template_name = 'nboard/post_list.html' #DEFAULT : <app_label>/<model_name>_list.html
 
     # ListView의 get_queryset을 오버라이딩 한 것. 이 함수는 자동실행(?)
     # queryset = Post.object...로 쓸 수도 있으나, 이 방법으로 쓰면 처음 실행시만 쿼리를 불러와 수정 후 프로세스를 재실행시켜줘야 반영됨
@@ -26,8 +27,9 @@ class PostListView(generic.ListView):
         return post_list
 
 
-class DetailView(generic.DetailView):
+class DetailView(HitCountDetailView):
     model = Post
+    count_hit = True  #조회수 추가 (쳄플릿에 hitcount로 사용) 
     pk_url_kwarg = 'post_id'
     context_object_name = 'post'
     template_name = 'nboard/post_detail.html'
@@ -166,3 +168,4 @@ def vote_comment(request, comment_id):
     else:
         comment.voter.add(request.user)
     return redirect('nboard:detail', post_id=comment.post.id)
+

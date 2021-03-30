@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load nboard_filter %}
+{% load hitcount_tags %}
 {% block content %}
 
 <div class="container my-3">
@@ -9,20 +10,22 @@
             <th>번호</th>
             <th>추천</th>
             <th style="width: 50%">제목</th>
+            <th>조회수</th>
             <th>글쓴이</th>
             <th>작성일시</th>
         </tr>
         </thead>
         <tbody>
-        {% if post_list %} 
+        {% if page_obj %} 
         <!-- post_list에 내용이 있을 경우 -->
-        {% for post in post_list %}
+        {% for post in page_obj %}
         <!-- post_list의 요소 question으로 정의하고 for문 -->
         <tr>
-            <td><!-- forloop.counter: for문 도는 숫자 카운트 - 일련번호 부여 -->
-                {{ forloop.counter }}
+            <td class="text-center"><!-- forloop.counter: for문 도는 숫자 카운트 - 일련번호 부여 -->
+                <!-- 일련번호 = 전체 게시물 개수 - 시작 인덱스 - 현재 인덱스 + 1 -->
+                {{ page_obj.paginator.count|sub:page_obj.start_index|sub:forloop.counter0|add:1 }}
             </td>
-            <td>
+            <td class="text-center">
                 {% if post.voter.all.count > 0 %}
                 <span class="badge badge-warning px-2 py-1">{{ post.voter.all.count }}</span>
                 {% endif %}
@@ -33,8 +36,9 @@
                 <span class="text-danger small ml-2">{{ post.comment_set.count }}</span>
                 {% endif %}
             </td>
-            <td>{{ post.author.username }}</td>
-            <td>{{ post.create_date }}</td>
+            <td class="text-center">{% get_hit_count for post %}</td>
+            <td class="text-center">{{ post.author.username }}</td>
+            <td class="text-center">{{ post.create_date }}</td>
         </tr>
         {% endfor %}
         {% else %}
@@ -48,9 +52,9 @@
     <!-- 페이징처리 시작 -->
     <ul class="pagination justify-content-center">
         <!-- 이전페이지 -->
-        {% if post_list.has_previous %}
+        {% if page_obj.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ post_list.previous_page_number }}">이전</a>
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">이전</a>
         </li>
         {% else %}
         <li class="page-item disabled">
@@ -58,10 +62,10 @@
         </li>
         {% endif %}
         <!-- 페이지리스트 -->
-        {% for page_number in post_list.paginator.page_range %}
-            {% if post_list.number <= 5 %}
+        {% for page_number in page_obj.paginator.page_range %}
+            {% if page_obj.number <= 5 %}
                 {% if page_number <= 9 %}
-                    {% if page_number == post_list.number %}
+                    {% if page_number == page_obj.number %}
                         <li class="page-item active" aria-current="page">
                             <a class="page-link" href="?page={{ page_number }}">{{ page_number }}</a>
                         </li>
@@ -72,8 +76,8 @@
                     {% endif %}
                 {% endif %}
             {% else %}
-            {% if page_number >= post_list.number|add:-4 and page_number <= post_list.number|add:4 %}
-                {% if page_number == post_list.number %}
+            {% if page_number >= page_obj.number|add:-4 and page_number <= page_obj.number|add:4 %}
+                {% if page_number == page_obj.number %}
                 <li class="page-item active" aria-current="page">
                     <a class="page-link" href="?page={{ page_number }}">{{ page_number }}</a>
                 </li>
@@ -86,9 +90,9 @@
             {% endif %}
         {% endfor %}
         <!-- 다음페이지 -->
-        {% if post_list.has_next %}
+        {% if page_obj.has_next %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ post_list.next_page_number }}">다음</a>
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">다음</a>
         </li>
         {% else %}
         <li class="page-item disabled">

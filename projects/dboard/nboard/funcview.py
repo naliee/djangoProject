@@ -29,6 +29,7 @@ def index(request):
 #                 <!-- forloop.counter0: 0부터 시작하는 루프 내의 현재 인덱스(끝에 0없으면 1부터 시작) -->
 
 
+
 def detail(request, post_id):
     """게시글 내용 출력"""
     post = get_object_or_404(Post, pk=post_id)

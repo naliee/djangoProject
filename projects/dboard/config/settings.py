@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'common.apps.CommonConfig',
     'nboard.apps.NboardConfig',
     'django_summernote',
+    'hitcount',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
