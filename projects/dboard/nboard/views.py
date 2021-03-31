@@ -4,14 +4,16 @@ from django.core.paginator import Paginator
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages # 오류를 임의로 발생시킬 때 사용(넌필드-입력값과 관계없이 발생한- 오류)
-
-from .models import Post, Comment
 from django.utils import timezone
 
+from .models import Post, Comment
 from .forms import PostForm, CommentForm
 
 from django.views import generic
+
 from hitcount.views import HitCountDetailView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 class PostListView(generic.ListView):
@@ -35,9 +37,6 @@ class DetailView(HitCountDetailView):
     template_name = 'nboard/post_detail.html'
 
 
-# 로그아웃 상태일 시 request.user에는 AnonymousUser객체가 들어있어 로그아웃 상태로 해당 함수 실행 시 오류 발생
-# 로그인이 필요한 로직의 경우 @login_required 어노테이션 적용 (login_url=: 로그아웃상태로 해당 함수 실행 시 이동할 URL)
-# 이 방식으로 common:login으로 이동 후, 로그인 성공 시 next파라미터에 있는 URL페이지로 이동(login.html에 next파라미터 추가해줌)
 @login_required(login_url='common:login')
 def comment_create(request, post_id):
     """게시글 댓글 등록"""
@@ -63,23 +62,23 @@ def comment_create(request, post_id):
     return render(request, 'nboard/post_detail.html', context)
 
 
-@login_required(login_url='common:login')
-def post_create(request):
-    """게시글 등록"""
-    if request.method == 'POST':    # 내용 입력 후 등록 클릭할 경우 POST - request의 POST요청으로 들어온 폼을 저장
-        form = PostForm(request.POST) 
+# LoginRequiredMixin 상속 가장 앞에 지정
+class PostCreateView(LoginRequiredMixin, generic.CreateView):
+    model = Post
+    context_object_name = 'form'
+    form_class = PostForm
+    success_url = reverse_lazy('nboard:index')
+    template_name = 'nboard/post_form.html'
 
-        if form.is_valid(): # form이 유효한지 검사
-            post = form.save(commit=False) # create_date는 아직 저장되지 않았으므로 임시저장
-            post.author = request.user
-            post.create_date = timezone.now()
-            post.save()
-            return redirect('nboard:index')
+    login_url = 'common:login'
 
-    else: # Get요청일 경우 - 내용 등록 버튼을 눌렀을 경우 등록 form 페이지
-        form = PostForm()
-    context = {'form':form}
-    return render(request, 'nboard/post_form.html', context)
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.author = self.request.user
+        post.create_date = timezone.now()
+        post.save()
+        return super().form_valid(form) #super(): 부모클래스 내용 사용 (오버라이딩한 자식의 메서드가 아닌 부모의 메서드 실행)
+
 
 
 @login_required(login_url='common:login')
