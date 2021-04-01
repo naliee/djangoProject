@@ -80,28 +80,27 @@ class PostCreateView(LoginRequiredMixin, generic.CreateView):
         return super().form_valid(form) #super(): 부모클래스 내용 사용 (오버라이딩한 자식의 메서드가 아닌 부모의 메서드 실행)
 
 
+class PostModifyView(LoginRequiredMixin, generic.UpdateView):
+    model = Post
+    pk_url_kwarg = 'post_id'
+    context_object_name = 'post'
+    form_class = PostForm
+    template_name = 'nboard/post_form.html'
 
-@login_required(login_url='common:login')
-def post_modify(request, post_id):
-    """nboard 게시글 수정"""
-    post = get_object_or_404(Post, pk=post_id)
-    # 유저가 게시글 작성자가 아닐 시 수정 불가 
-    if request.user != post.author:
-        messages.error(request, '수정 권한이 없습니다')
-        return redirect('nboard:detail', post_id=post_id)
+    login_url = 'common:login'
 
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post) # 질문 수정 화면에 기존 데이터가 반영되도록 instance 매개변수에 저장
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.modify_date = timezone.now()
-            post.save()
-            return redirect('nboard:detail', post_id=post_id)
-    else:   # 수정하기 누르면 GET 호출, 질문 수정(form)화면 표시
-        form = PostForm(instance=post)
-    context = {'form':form}
-    return render(request, 'nboard/post_form.html', context)
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.author = self.request.user
+        post.modify_date = timezone.now()
+        post.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # DetailView 등에서 reverse_lazy()를 사용하며 pk를 전달하기 위해 함수 재정의
+        post_id = self.kwargs['post_id'] # kwargs: n개의 변수를 함수의 인자로 보낼 때 사용
+        return reverse_lazy('nboard:detail', kwargs={'post_id':post_id})
+
 
 
 @login_required(login_url='common:login')

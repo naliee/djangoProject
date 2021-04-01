@@ -83,3 +83,26 @@ def comment_create(request, post_id):
     context = {'post':post, 'form':form}
 
     return render(request, 'nboard/post_detail.html', context)
+
+
+@login_required(login_url='common:login')
+def post_modify(request, post_id):
+    """nboard 게시글 수정"""
+    post = get_object_or_404(Post, pk=post_id)
+    # 유저가 게시글 작성자가 아닐 시 수정 불가 
+    if request.user != post.author:
+        messages.error(request, '수정 권한이 없습니다')
+        return redirect('nboard:detail', post_id=post_id)
+
+    if request.method == "POST":
+        form = PostForm(request.POST, instance=post) # 질문 수정 화면에 기존 데이터가 반영되도록 instance 매개변수에 저장
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.modify_date = timezone.now()
+            post.save()
+            return redirect('nboard:detail', post_id=post_id)
+    else:   # 수정하기 누르면 GET 호출, 질문 수정(form)화면 표시
+        form = PostForm(instance=post)
+    context = {'form':form}
+    return render(request, 'nboard/post_form.html', context)
