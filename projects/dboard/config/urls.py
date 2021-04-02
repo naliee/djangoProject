@@ -17,11 +17,12 @@ from django.contrib import admin
 from django.urls import path, include
 
 from nboard import views
+from nboard.views import base_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('nboard/', include('nboard.urls')),
     path('common/', include('common.urls')),
-    path('', views.PostListView.as_view(), name='index'), # '' = '/'
+    path('', base_views.PostListView.as_view(), name='index'), # '' = '/'
     path('summernote/', include('django_summernote.urls')),
 ]
